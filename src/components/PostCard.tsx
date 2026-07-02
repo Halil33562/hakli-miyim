@@ -112,29 +112,80 @@ export default function PostCard({ post }: { post: Post }) {
     setPendingVoteType(null)
   }
 
-  return (
-    <div style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '1rem', marginBottom: '1rem' }}>
-      <Link href={`/post/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-        <h2 style={{ cursor: 'pointer' }}>{post.title}</h2>
-      </Link>
-      <p>{post.content}</p>
+  const total = upvotes + downvotes
+  const upPercent = total === 0 ? 50 : Math.round((upvotes / total) * 100)
+  const downPercent = 100 - upPercent
+  const caseNumber = String(post.id).padStart(3, '0')
 
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', alignItems: 'center' }}>
-        <button onClick={() => handleVote('up')} disabled={voted || checking}>
-          👍 Haklısın ({upvotes})
+  return (
+    <div style={{ background: '#FBF9F1', border: '1px solid #DDD4BC', borderRadius: '6px', padding: '20px 22px' }}>
+      <p style={{ fontFamily: 'var(--font-plex-mono), monospace', fontSize: '10px', letterSpacing: '0.06em', color: '#A79B72', margin: '0 0 8px' }}>
+        DOSYA NO {caseNumber}
+      </p>
+
+      <Link href={`/post/${post.id}`} style={{ textDecoration: 'none' }}>
+        <h2 style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 600, fontSize: '19px', color: '#22211A', margin: '0 0 8px', lineHeight: 1.3, cursor: 'pointer' }}>
+          {post.title}
+        </h2>
+      </Link>
+
+      <p style={{ fontSize: '13px', color: '#5C594A', lineHeight: 1.6, margin: '0 0 18px' }}>
+        {post.content}
+      </p>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+        <button
+          onClick={() => handleVote('up')}
+          disabled={voted || checking}
+          style={{
+            flex: 1,
+            fontFamily: 'var(--font-plex-mono), monospace',
+            fontSize: '12px',
+            background: '#EAF3DE',
+            color: '#27500A',
+            border: '1.5px solid #97C459',
+            borderRadius: '4px',
+            padding: '9px 0',
+            cursor: voted || checking ? 'default' : 'pointer',
+            opacity: voted || checking ? 0.6 : 1,
+            transform: 'rotate(-1deg)',
+          }}
+        >
+          Haklısın · {upvotes}
         </button>
-        <button onClick={() => handleVote('down')} disabled={voted || checking}>
-          👎 Haksızsın ({downvotes})
+        <button
+          onClick={() => handleVote('down')}
+          disabled={voted || checking}
+          style={{
+            flex: 1,
+            fontFamily: 'var(--font-plex-mono), monospace',
+            fontSize: '12px',
+            background: '#FCEBEB',
+            color: '#791F1F',
+            border: '1.5px solid #F09595',
+            borderRadius: '4px',
+            padding: '9px 0',
+            cursor: voted || checking ? 'default' : 'pointer',
+            opacity: voted || checking ? 0.6 : 1,
+            transform: 'rotate(1deg)',
+          }}
+        >
+          Haksızsın · {downvotes}
         </button>
       </div>
 
+      <div style={{ height: '4px', borderRadius: '2px', overflow: 'hidden', display: 'flex' }}>
+        <div style={{ width: `${upPercent}%`, background: '#639922' }} />
+        <div style={{ width: `${downPercent}%`, background: '#E24B4A' }} />
+      </div>
+
       {pendingVoteType && (
-        <div style={{ marginTop: '0.75rem' }}>
+        <div style={{ marginTop: '14px' }}>
           <TurnstileWidget onVerify={handleTurnstileVerify} />
         </div>
       )}
 
-      {errorMsg && <p style={{ color: 'red', marginTop: '0.5rem' }}>{errorMsg}</p>}
+      {errorMsg && <p style={{ color: '#E24B4A', marginTop: '10px', fontSize: '12px' }}>{errorMsg}</p>}
     </div>
   )
 }
