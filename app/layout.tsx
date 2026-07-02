@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <Navbar />
-          {children}
-        </AuthProvider>
-      </body>
+       <body className="min-h-full flex flex-col">
+          <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+            <AuthProvider>
+              <Navbar />
+              {children}
+            </AuthProvider>
+        </body>
     </html>
   );
 }
