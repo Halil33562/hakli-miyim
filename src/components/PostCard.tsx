@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import Link from 'next/link'
 
 type Post = {
   id: number
@@ -17,7 +18,7 @@ export default function PostCard({ post }: { post: Post }) {
   const [voted, setVoted] = useState(false)
 
   async function handleVote(type: 'up' | 'down') {
-    if (voted) return // aynı oturumda ikinci kez oy vermeyi engelle
+    if (voted) return
 
     const column = type === 'up' ? 'upvotes' : 'downvotes'
     const newValue = type === 'up' ? upvotes + 1 : downvotes + 1
@@ -46,7 +47,9 @@ export default function PostCard({ post }: { post: Post }) {
         marginBottom: '1rem',
       }}
     >
-      <h2>{post.title}</h2>
+      <Link href={`/post/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <h2 style={{ cursor: 'pointer' }}>{post.title}</h2>
+      </Link>
       <p>{post.content}</p>
       <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
         <button onClick={() => handleVote('up')} disabled={voted}>
