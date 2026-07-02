@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/context/AuthContext'
+import Link from 'next/link'
 
 export default function CommentForm({ postId }: { postId: number }) {
   const router = useRouter()
-  const [name, setName] = useState('')
+  const { user, profile, loading: authLoading } = useAuth()
   const [content, setContent] = useState('')
-  const [website, setWebsite] = useState('') // honeypot: botlar bunu doldurur, insanlar görmez
+  const [website, setWebsite] = useState('') // honeypot
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -16,9 +18,7 @@ export default function CommentForm({ postId }: { postId: number }) {
     e.preventDefault()
     setErrorMsg('')
 
-    // Bot koruması: gizli alan doluysa sessizce reddet
     if (website.trim() !== '') {
-      setErrorMsg('')
       setContent('')
       return
     }
@@ -28,12 +28,18 @@ export default function CommentForm({ postId }: { postId: number }) {
       return
     }
 
+    if (!user) {
+      setErrorMsg('Yorum yapmak için giriş yapmalısın.')
+      return
+    }
+
     setLoading(true)
 
     const { error } = await supabase.from('comments').insert({
       post_id: postId,
       content: content.trim(),
-      author_name: name.trim() === '' ? 'Anonim' : name.trim(),
+      author_name: profile?.username ?? 'Kullanıcı',
+      user_id: user.id,
     })
 
     setLoading(false)
@@ -44,21 +50,21 @@ export default function CommentForm({ postId }: { postId: number }) {
     }
 
     setContent('')
-    setName('')
-    router.refresh() // yorum listesini yeniden çek
+    router.refresh()
+  }
+
+  if (authLoading) return null
+
+  if (!user) {
+    return (
+      <p style={{ marginTop: '1rem' }}>
+        Yorum yapmak için <Link href="/giris">giriş yapmalısın</Link>.
+      </p>
+    )
   }
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="İsim (opsiyonel, boş bırakırsan Anonim yazar)"
-        style={{ padding: '0.5rem' }}
-      />
-
-      {/* Honeypot alanı - gerçek kullanıcılar görmez */}
       <input
         type="text"
         value={website}
