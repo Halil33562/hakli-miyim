@@ -15,7 +15,9 @@ export default function Navbar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '13px', color: '#5C594A' }}>
         {loading ? null : user ? (
           <>
-            <span>{profile?.username ?? 'Kullanıcı'}</span>
+            <Link href="/profil" style={{ color: '#2B2A22', textDecoration: 'none', fontWeight: 500 }}>
+  {profile?.username ?? 'Kullanıcı'}
+</Link>
             <button
               onClick={signOut}
               style={{ border: '1px solid #B8AF93', borderRadius: '4px', padding: '6px 14px', color: '#2B2A22', fontWeight: 500, background: 'transparent', cursor: 'pointer', fontSize: '13px' }}

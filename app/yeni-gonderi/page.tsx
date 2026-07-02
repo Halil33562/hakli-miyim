@@ -3,9 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/context/AuthContext'
+import Link from 'next/link'
 
 export default function YeniGonderi() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
@@ -19,6 +22,11 @@ export default function YeniGonderi() {
       return
     }
 
+    if (!user) {
+      setErrorMsg('Dava açmak için giriş yapmalısın.')
+      return
+    }
+
     setLoading(true)
     setErrorMsg('')
 
@@ -27,6 +35,7 @@ export default function YeniGonderi() {
       content,
       upvotes: 0,
       downvotes: 0,
+      user_id: user.id,
     })
 
     setLoading(false)
@@ -37,6 +46,18 @@ export default function YeniGonderi() {
     }
 
     router.push('/')
+  }
+
+  if (authLoading) return null
+
+  if (!user) {
+    return (
+      <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+        <p style={{ fontSize: '14px', color: '#5C594A' }}>
+          Dava açmak için <Link href="/giris" style={{ color: '#22211A', fontWeight: 500 }}>giriş yapmalısın</Link>.
+        </p>
+      </div>
+    )
   }
 
   return (
