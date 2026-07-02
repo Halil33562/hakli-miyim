@@ -2,15 +2,53 @@ import { supabase } from '@/lib/supabase'
 import PostCard from '@/components/PostCard'
 import Link from 'next/link'
 
-export default async function Home() {
+type Post = {
+  id: number
+  title: string
+  content: string
+  created_at: string
+  upvotes: number
+  downvotes: number
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>
+}) {
+  const { filter } = await searchParams
+  const activeFilter = filter ?? 'yeni'
+
   const { data: posts, error } = await supabase
     .from('posts')
     .select('*')
-    .order('created_at', { ascending: false })
 
   if (error) {
     return <p style={{ padding: '2rem' }}>Hata oluştu: {error.message}</p>
   }
+
+  let sortedPosts = [...(posts ?? [])] as Post[]
+
+  if (activeFilter === 'yeni') {
+    sortedPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  } else if (activeFilter === 'tartisilan') {
+    sortedPosts.sort((a, b) => (b.upvotes + b.downvotes) - (a.upvotes + a.downvotes))
+  } else if (activeFilter === 'belirsiz') {
+    sortedPosts = sortedPosts.filter((p) => p.upvotes + p.downvotes >= 3)
+    sortedPosts.sort((a, b) => {
+      const totalA = a.upvotes + a.downvotes
+      const totalB = b.upvotes + b.downvotes
+      const distA = Math.abs(50 - Math.round((a.upvotes / totalA) * 100))
+      const distB = Math.abs(50 - Math.round((b.upvotes / totalB) * 100))
+      return distA - distB
+    })
+  }
+
+  const tabs = [
+    { key: 'yeni', label: 'Yeni' },
+    { key: 'tartisilan', label: 'En çok tartışılan' },
+    { key: 'belirsiz', label: 'Kazananı belirsiz' },
+  ]
 
   return (
     <div>
@@ -31,10 +69,38 @@ export default async function Home() {
         </Link>
       </div>
 
-      <div style={{ padding: '24px 28px 48px', maxWidth: '640px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {posts?.length === 0 && <p style={{ color: '#5C594A', fontSize: '14px' }}>Henüz dava yok, ilkini sen aç.</p>}
+      <div style={{ maxWidth: '640px', margin: '0 auto', padding: '20px 28px 0', display: 'flex', gap: '6px' }}>
+        {tabs.map((tab) => {
+          const active = activeFilter === tab.key
+          return (
+            <Link key={tab.key} href={`/?filter=${tab.key}`} style={{ textDecoration: 'none' }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  fontFamily: 'var(--font-plex-mono), monospace',
+                  fontSize: '12px',
+                  padding: '7px 14px',
+                  borderRadius: '4px',
+                  background: active ? '#22211A' : 'transparent',
+                  color: active ? '#F1EEE4' : '#8A7F5C',
+                  border: active ? 'none' : '1px solid #DDD4BC',
+                }}
+              >
+                {tab.label}
+              </span>
+            </Link>
+          )
+        })}
+      </div>
 
-        {posts?.map((post) => (
+      <div style={{ padding: '24px 28px 48px', maxWidth: '640px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {sortedPosts.length === 0 && (
+          <p style={{ color: '#5C594A', fontSize: '14px' }}>
+            {activeFilter === 'belirsiz' ? 'Henüz yeterince oy almış dava yok.' : 'Henüz dava yok, ilkini sen aç.'}
+          </p>
+        )}
+
+        {sortedPosts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
       </div>
