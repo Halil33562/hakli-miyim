@@ -1,28 +1,15 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
-/**
- * POST /api/vote
- * Body: { postId: number, voteType: 'up' | 'down', token: string, anonId: string }
- * Anonim (giriş yapmamış) kullanıcılar için oy kaydeder.
- * Turnstile token'ı sunucu tarafında doğrular.
- */
 export async function POST(request: Request) {
   try {
     const { postId, voteType, token, anonId } = await request.json()
 
-    if (
-      typeof postId !== 'number' ||
-      (voteType !== 'up' && voteType !== 'down') ||
-      typeof token !== 'string' ||
-      token.trim() === '' ||
-      typeof anonId !== 'string' ||
-      anonId.trim() === ''
-    ) {
-      return NextResponse.json({ error: 'Geçersiz veri' }, { status: 400 })
+    if (typeof postId !== 'number' || (voteType !== 'up' && voteType !== 'down') || !token || !anonId) {
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
 
-    // 1. Turnstile token'ı Cloudflare'e sunucu tarafında doğrulat
+    // Turnstile token'ı sunucuda doğrula
     const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -32,28 +19,23 @@ export async function POST(request: Request) {
       }),
     })
     const verifyData = await verifyRes.json()
-
     if (!verifyData.success) {
       return NextResponse.json({ error: 'Doğrulama başarısız' }, { status: 403 })
     }
 
-    // 2. Bu anon kullanıcı bu posta zaten oy vermiş mi?
-    const { data: existing, error: checkError } = await supabase
+    // Aynı anon kullanıcı bu posta zaten oy vermiş mi?
+    const { data: existing } = await supabase
       .from('votes')
       .select('id')
       .eq('post_id', postId)
       .eq('anon_id', anonId)
       .maybeSingle()
 
-    if (checkError) {
-      return NextResponse.json({ error: checkError.message }, { status: 500 })
-    }
-
     if (existing) {
       return NextResponse.json({ error: 'Zaten oy vermişsin' }, { status: 409 })
     }
 
-    // 3. Oy sayısını veritabanında atomik şekilde artır (RPC)
+    // Atomik artırım için RPC kullan (aşağıda açıklıyorum)
     const { data: newValue, error: rpcError } = await supabase.rpc('increment_vote', {
       p_post_id: postId,
       p_vote_type: voteType,
@@ -63,19 +45,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: rpcError.message }, { status: 500 })
     }
 
-    // 4. Oyu kaydet
-    const { error: insertError } = await supabase.from('votes').insert({
-      post_id: postId,
-      vote_type: voteType,
-      anon_id: anonId,
-    })
-
-    if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 })
-    }
+    await supabase.from('votes').insert({ post_id: postId, vote_type: voteType, anon_id: anonId })
 
     return NextResponse.json({ success: true, newValue })
   } catch (e) {
-    return NextResponse.json({ error: 'Sunucu hatası' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

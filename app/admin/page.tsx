@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
 
-const ADMIN_EMAIL = 'halilturkan35@gmail.com'
+
 
 type Report = {
   id: number
@@ -37,8 +37,8 @@ const TABS = [
 ]
 
 export default function AdminPage() {
-  const { user, loading: authLoading } = useAuth()
-  const isAdmin = user?.email === ADMIN_EMAIL
+  const { user, profile, loading: authLoading } = useAuth()
+  const isAdmin = profile?.is_admin === true
 
   const [activeTab, setActiveTab] = useState('raporlar')
 

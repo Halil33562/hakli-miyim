@@ -1,9 +1,13 @@
+// app/ayarlar/page.tsx
 'use client'
 
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { useLanguage } from '@/context/LanguageContext'
+import { useTheme } from '@/context/ThemeContext'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { useTranslation } from '@/lib/useTranslation'
 
 const USERNAME_COOLDOWN_DAYS = 7
 const GENDERS = [
@@ -15,6 +19,9 @@ const GENDERS = [
 
 export default function AyarlarPage() {
   const { user, profile, loading, refreshProfile } = useAuth()
+  const { lang, toggleLang } = useLanguage()
+  const { theme, toggleTheme } = useTheme()
+  const { t } = useTranslation()
 
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [avatarMsg, setAvatarMsg] = useState('')
@@ -44,7 +51,10 @@ export default function AyarlarPage() {
     return (
       <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
         <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-          Ayarları görmek için <Link href="/giris" style={{ color: 'var(--brand)', fontWeight: 600 }}>giriş yapmalısın</Link>.
+          {t('settings.loginRequired')}{' '}
+          <Link href="/giris" style={{ color: 'var(--brand)', fontWeight: 600 }}>
+            {t('nav.login')}
+          </Link>
         </p>
       </div>
     )
@@ -56,6 +66,7 @@ export default function AyarlarPage() {
     : USERNAME_COOLDOWN_DAYS
   const canChangeUsername = daysSinceChange >= USERNAME_COOLDOWN_DAYS
 
+  // ===== FONKSİYONLAR =====
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -209,20 +220,109 @@ export default function AyarlarPage() {
     setNewPassword('')
   }
 
-  const sectionStyle: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '18px', marginBottom: '16px' }
-  const miniCardStyle: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '16px' }
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '8px 10px', fontSize: '13px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: '8px' }
-  const buttonStyle: React.CSSProperties = { fontSize: '12px', fontWeight: 600, padding: '9px 16px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 'var(--radius-full)', cursor: 'pointer' }
-  const msgStyle: React.CSSProperties = { fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px' }
-  const titleStyle: React.CSSProperties = { fontFamily: 'var(--font-fraunces), sans-serif', fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)', margin: '0 0 10px' }
+  // ===== STILLER =====
+  const sectionStyle: React.CSSProperties = {
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-md)',
+    padding: '18px',
+    marginBottom: '16px'
+  }
 
+  const miniCardStyle: React.CSSProperties = {
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-md)',
+    padding: '16px'
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '8px 10px',
+    fontSize: '13px',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-sm)',
+    marginBottom: '8px'
+  }
+
+  const buttonStyle: React.CSSProperties = {
+    fontSize: '12px',
+    fontWeight: 600,
+    padding: '9px 16px',
+    background: 'var(--brand)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 'var(--radius-full)',
+    cursor: 'pointer'
+  }
+
+  const msgStyle: React.CSSProperties = {
+    fontSize: '11px',
+    color: 'var(--text-secondary)',
+    marginTop: '6px'
+  }
+
+  const titleStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-fraunces), sans-serif',
+    fontWeight: 700,
+    fontSize: '14px',
+    color: 'var(--text-primary)',
+    margin: '0 0 10px'
+  }
+
+  // ===== RENDER =====
   return (
     <div style={{ maxWidth: '760px', margin: '0 auto', padding: '40px 28px 48px' }}>
       <h1 style={{ fontFamily: 'var(--font-fraunces), sans-serif', fontWeight: 800, fontSize: '28px', color: 'var(--text-primary)', margin: '0 0 20px' }}>
-        Hesap ayarların
+        {t('settings.title')}
       </h1>
 
-      {/* Profil kartı: avatar solda, bio + cinsiyet sağda */}
+      {/* DİL + TEMA KARTI */}
+      <div style={{ ...sectionStyle, display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div>
+            <p style={titleStyle}>🌐 {t('settings.language')}</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>{t('settings.languageDesc')}</p>
+          </div>
+          <button
+            onClick={toggleLang}
+            style={{
+              fontSize: '13px',
+              fontWeight: 600,
+              padding: '8px 18px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--brand)',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {lang === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English'}
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div>
+            <p style={titleStyle}>🎨 {t('settings.theme')}</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>{t('settings.themeDesc')}</p>
+          </div>
+          <button
+            onClick={toggleTheme}
+            style={{
+              fontSize: '20px',
+              padding: '6px 14px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer',
+            }}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+        </div>
+      </div>
+
+      {/* PROFİL KARTI */}
       <div style={{ ...sectionStyle, display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
         <div style={{ flex: '0 0 140px', textAlign: 'center' }}>
           <img
@@ -231,7 +331,7 @@ export default function AyarlarPage() {
             style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)', marginBottom: '10px' }}
           />
           <label style={{ ...buttonStyle, display: 'inline-block', fontSize: '11px', padding: '7px 12px' }}>
-            {avatarUploading ? 'Yükleniyor...' : 'Fotoğraf değiştir'}
+            {avatarUploading ? 'Yükleniyor...' : t('settings.avatar')}
             <input type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} disabled={avatarUploading} />
           </label>
           {avatarMsg && <p style={msgStyle}>{avatarMsg}</p>}
@@ -239,83 +339,113 @@ export default function AyarlarPage() {
 
         <div style={{ flex: 1, minWidth: '220px' }}>
           <form onSubmit={handleBioSave} style={{ marginBottom: '14px' }}>
-            <p style={titleStyle}>Biyografi</p>
+            <p style={titleStyle}>{t('settings.bio')}</p>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="Kendinden kısaca bahset..."
+              placeholder={t('form.bio.placeholder')}
               rows={2}
               style={{ ...inputStyle, resize: 'vertical', marginBottom: '6px' }}
             />
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <button type="submit" style={{ ...buttonStyle, fontSize: '11px', padding: '7px 14px' }} disabled={bioLoading}>
-                {bioLoading ? '...' : 'Kaydet'}
+                {bioLoading ? '...' : t('button.save')}
               </button>
               <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{bio.length}/200</span>
               {bioMsg && <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{bioMsg}</span>}
             </div>
           </form>
 
-          <p style={titleStyle}>Cinsiyet</p>
+          <p style={titleStyle}>{t('settings.gender')}</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            {GENDERS.map((g) => (
-              <button
-                key={g.key}
-                type="button"
-                onClick={() => handleGenderSave(g.key)}
-                style={{
-                  fontSize: '11px',
-                  padding: '6px 12px',
-                  borderRadius: 'var(--radius-full)',
-                  background: gender === g.key ? 'var(--brand)' : 'var(--bg)',
-                  color: gender === g.key ? '#fff' : 'var(--text-secondary)',
-                  border: gender === g.key ? 'none' : '1px solid var(--border)',
-                  cursor: 'pointer',
-                }}
-              >
-                {g.label}
-              </button>
-            ))}
+            {GENDERS.map((g) => {
+              const labelMap: Record<string, string> = {
+                'belirtmek_istemiyorum': t('settings.gender.none'),
+                'kadın': t('settings.gender.female'),
+                'erkek': t('settings.gender.male'),
+                'diğer': t('settings.gender.other'),
+              }
+              return (
+                <button
+                  key={g.key}
+                  type="button"
+                  onClick={() => handleGenderSave(g.key)}
+                  style={{
+                    fontSize: '11px',
+                    padding: '6px 12px',
+                    borderRadius: 'var(--radius-full)',
+                    background: gender === g.key ? 'var(--brand)' : 'var(--bg)',
+                    color: gender === g.key ? '#fff' : 'var(--text-secondary)',
+                    border: gender === g.key ? 'none' : '1px solid var(--border)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {labelMap[g.key] || g.label}
+                </button>
+              )
+            })}
           </div>
           {genderMsg && <p style={msgStyle}>{genderMsg}</p>}
         </div>
       </div>
 
-      {/* Hesap ayarları: 3'lü yan yana grid */}
-      <div className="settings-grid">
+      {/* HESAP AYARLARI GRID */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
+        {/* Kullanıcı Adı */}
         <div style={miniCardStyle}>
-          <p style={titleStyle}>Kullanıcı adı</p>
+          <p style={titleStyle}>{t('settings.username')}</p>
           <p style={{ fontSize: '10px', color: 'var(--text-muted)', margin: '0 0 8px' }}>
-            {canChangeUsername ? 'Değiştirebilirsin.' : `${USERNAME_COOLDOWN_DAYS - daysSinceChange} gün sonra.`}
+            {canChangeUsername ? t('settings.usernameChange') : t('settings.usernameWait', { days: USERNAME_COOLDOWN_DAYS - daysSinceChange })}
           </p>
           <form onSubmit={handleUsernameChange}>
-            <input type="text" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} placeholder={profile?.username ?? 'Yeni ad'} style={inputStyle} disabled={!canChangeUsername} />
+            <input
+              type="text"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+              placeholder={profile?.username ?? 'Yeni ad'}
+              style={inputStyle}
+              disabled={!canChangeUsername}
+            />
             <button type="submit" style={{ ...buttonStyle, width: '100%' }} disabled={usernameLoading || !canChangeUsername}>
-              {usernameLoading ? '...' : 'Kaydet'}
+              {usernameLoading ? '...' : t('button.save')}
             </button>
             {usernameMsg && <p style={msgStyle}>{usernameMsg}</p>}
           </form>
         </div>
 
+        {/* E-posta */}
         <div style={miniCardStyle}>
-          <p style={titleStyle}>E-posta</p>
+          <p style={titleStyle}>{t('settings.email')}</p>
           <p style={{ fontSize: '10px', color: 'var(--text-muted)', margin: '0 0 8px' }}>{user.email}</p>
           <form onSubmit={handleEmailChange}>
-            <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="yeni@eposta.com" style={inputStyle} />
+            <input
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder={t('form.newEmail')}
+              style={inputStyle}
+            />
             <button type="submit" style={{ ...buttonStyle, width: '100%' }} disabled={emailLoading}>
-              {emailLoading ? '...' : 'Değiştir'}
+              {emailLoading ? '...' : t('button.change')}
             </button>
             {emailMsg && <p style={msgStyle}>{emailMsg}</p>}
           </form>
         </div>
 
+        {/* Şifre */}
         <div style={miniCardStyle}>
-          <p style={titleStyle}>Şifre</p>
-          <p style={{ fontSize: '10px', color: 'var(--text-muted)', margin: '0 0 8px' }}>En az 6 karakter.</p>
+          <p style={titleStyle}>{t('settings.password')}</p>
+          <p style={{ fontSize: '10px', color: 'var(--text-muted)', margin: '0 0 8px' }}>{t('settings.passwordMin')}</p>
           <form onSubmit={handlePasswordChange}>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Yeni şifre" style={inputStyle} />
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder={t('form.newPassword')}
+              style={inputStyle}
+            />
             <button type="submit" style={{ ...buttonStyle, width: '100%' }} disabled={passwordLoading}>
-              {passwordLoading ? '...' : 'Kaydet'}
+              {passwordLoading ? '...' : t('button.save')}
             </button>
             {passwordMsg && <p style={msgStyle}>{passwordMsg}</p>}
           </form>

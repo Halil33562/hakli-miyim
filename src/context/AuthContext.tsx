@@ -11,6 +11,7 @@ type Profile = {
   bio: string | null
   gender: string | null
   username_changed_at?: string
+  is_admin?: boolean
 }
 
 type AuthContextType = {
@@ -59,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function loadProfile(userId: string) {
     const { data } = await supabase
       .from('profiles')
-      .select('id, username, avatar_url, bio, gender, username_changed_at')
+      .select('id, username, avatar_url, bio, gender, username_changed_at, is_admin')
       .eq('id', userId)
       .single()
 

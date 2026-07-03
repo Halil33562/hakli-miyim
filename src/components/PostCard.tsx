@@ -115,6 +115,8 @@ export default function PostCard({ post }: { post: Post }) {
     setErrorMsg('')
 
     if (user) {
+      // 1. Önce oy kaydını dene — DB tarafında unique constraint varsa
+      // aynı kullanıcı ikinci kez oy veremez.
       const { error: insertError } = await supabase.from('votes').insert({
         post_id: post.id,
         vote_type: type,
@@ -126,21 +128,20 @@ export default function PostCard({ post }: { post: Post }) {
         return
       }
 
-      const column = type === 'up' ? 'upvotes' : 'downvotes'
-      const newValue = type === 'up' ? upvotes + 1 : downvotes + 1
+      // 2. Oy sayısını client'ta hesaplayıp göndermek yerine
+      // veritabanında atomik olarak artır (RPC).
+      const { data: newValue, error: rpcError } = await supabase.rpc('increment_vote', {
+        p_post_id: post.id,
+        p_vote_type: type,
+      })
 
-      const { error: updateError } = await supabase
-        .from('posts')
-        .update({ [column]: newValue })
-        .eq('id', post.id)
-
-      if (updateError) {
+      if (rpcError) {
         setErrorMsg('Oy sayısı güncellenirken hata oluştu.')
         return
       }
 
-      if (type === 'up') setUpvotes(newValue)
-      else setDownvotes(newValue)
+      if (type === 'up') setUpvotes(newValue as number)
+      else setDownvotes(newValue as number)
       setVoted(true)
     } else {
       setPendingVoteType(type)

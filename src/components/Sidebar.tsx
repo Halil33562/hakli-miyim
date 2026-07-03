@@ -5,13 +5,10 @@ import { useAuth } from '@/context/AuthContext'
 import { useSidebar } from '@/context/SidebarContext'
 import { CATEGORIES } from '@/lib/categories'
 
-const ADMIN_EMAIL = 'halilturkan35@gmail.com'
-
 export default function Sidebar() {
   const { open, close } = useSidebar()
-  const { user, profile, signOut } = useAuth()
-  const isAdmin = user?.email === ADMIN_EMAIL
-
+const { user, profile, signOut } = useAuth()
+const isAdmin = profile?.is_admin === true
   return (
     <>
       {open && (

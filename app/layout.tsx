@@ -1,7 +1,10 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { LanguageProvider } from "@/context/LanguageContext";
+import { ThemeProvider } from "@/context/ThemeContext"; // ← EKLE
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import { SidebarProvider } from "@/context/SidebarContext";
@@ -26,8 +29,8 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Haklı mıyım?",
-  description: "Olayını anlat, karar halkın olsun.",
+  title: "Am I Right?",
+  description: "Tell your story, let the public decide.",
 };
 
 export default function RootLayout({
@@ -37,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="tr"
+      lang="en"
       className={`${displayFont.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body
@@ -46,11 +49,15 @@ export default function RootLayout({
       >
         <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
         <AuthProvider>
-          <SidebarProvider>
-            <Sidebar />
-            <Navbar />
-            {children}
-          </SidebarProvider>
+          <LanguageProvider>
+            <ThemeProvider> {/* ← EKLE */}
+              <SidebarProvider>
+                <Sidebar />
+                <Navbar />
+                {children}
+              </SidebarProvider>
+            </ThemeProvider>
+          </LanguageProvider>
         </AuthProvider>
       </body>
     </html>
