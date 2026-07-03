@@ -7,6 +7,10 @@ import type { User } from '@supabase/supabase-js'
 type Profile = {
   id: string
   username: string
+  avatar_url: string | null
+  bio: string | null
+  gender: string | null
+  username_changed_at?: string
 }
 
 type AuthContextType = {
@@ -14,6 +18,7 @@ type AuthContextType = {
   profile: Profile | null
   loading: boolean
   signOut: () => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   signOut: async () => {},
+  refreshProfile: async () => {},
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -53,11 +59,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function loadProfile(userId: string) {
     const { data } = await supabase
       .from('profiles')
-      .select('id, username')
+      .select('id, username, avatar_url, bio, gender, username_changed_at')
       .eq('id', userId)
       .single()
 
     setProfile(data ?? null)
+  }
+
+  async function refreshProfile() {
+    if (user) await loadProfile(user.id)
   }
 
   async function signOut() {
@@ -67,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
