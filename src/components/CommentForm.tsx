@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 
-export default function CommentForm({ postId }: { postId: number }) {
+export default function CommentForm({ postId, onSuccess }: { postId: number; onSuccess?: () => void }) {
   const router = useRouter()
   const { user, profile, loading: authLoading } = useAuth()
   const [content, setContent] = useState('')
@@ -51,6 +51,7 @@ export default function CommentForm({ postId }: { postId: number }) {
 
     setContent('')
     router.refresh()
+    onSuccess?.()
   }
 
   if (authLoading) return null

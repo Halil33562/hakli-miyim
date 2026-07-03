@@ -2,33 +2,39 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
+import { useSidebar } from '@/context/SidebarContext'
 
 export default function Navbar() {
-  const { user, profile, loading, signOut } = useAuth()
+  const { user, loading, signOut } = useAuth()
+  const { toggle } = useSidebar()
 
   return (
-    <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 28px', borderBottom: '1px solid #DDD4BC', background: '#EFE9DA' }}>
-      <Link href="/" style={{ fontFamily: 'var(--font-fraunces), serif', fontStyle: 'italic', fontWeight: 600, fontSize: '20px', color: '#2B2A22', textDecoration: 'none' }}>
-        Haklı mıyım?
-      </Link>
+    <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <button
+          onClick={toggle}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', padding: '4px', color: 'var(--text-secondary)' }}
+          aria-label="Menü"
+        >
+          ☰
+        </button>
+        <Link href="/" style={{ fontFamily: 'var(--font-fraunces), sans-serif', fontWeight: 700, fontSize: '18px', color: 'var(--text-primary)' }}>
+          Haklı mıyım?
+        </Link>
+      </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '13px', color: '#5C594A' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
         {loading ? null : user ? (
-          <>
-            <Link href="/profil" style={{ color: '#2B2A22', textDecoration: 'none', fontWeight: 500 }}>
-  {profile?.username ?? 'Kullanıcı'}
-</Link>
-            <button
-              onClick={signOut}
-              style={{ border: '1px solid #B8AF93', borderRadius: '4px', padding: '6px 14px', color: '#2B2A22', fontWeight: 500, background: 'transparent', cursor: 'pointer', fontSize: '13px' }}
-            >
-              Çıkış yap
-            </button>
-          </>
+          <button
+            onClick={signOut}
+            style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-full)', padding: '7px 16px', color: 'var(--text-primary)', fontWeight: 500, background: 'transparent', cursor: 'pointer', fontSize: '13px' }}
+          >
+            Çıkış yap
+          </button>
         ) : (
           <>
-            <Link href="/giris" style={{ color: '#2B2A22', textDecoration: 'none' }}>Giriş yap</Link>
-            <Link href="/kayit" style={{ border: '1px solid #B8AF93', borderRadius: '4px', padding: '6px 14px', color: '#2B2A22', fontWeight: 500, textDecoration: 'none' }}>
+            <Link href="/giris" style={{ color: 'var(--text-secondary)', fontWeight: 500, padding: '7px 10px' }}>Giriş yap</Link>
+            <Link href="/kayit" style={{ background: 'var(--brand)', color: '#fff', borderRadius: 'var(--radius-full)', padding: '8px 16px', fontWeight: 600 }}>
               Kayıt ol
             </Link>
           </>

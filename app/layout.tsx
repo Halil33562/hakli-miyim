@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
+import { SidebarProvider } from "@/context/SidebarContext";
 import Script from "next/script";
 
-const fraunces = Fraunces({
+const displayFont = Plus_Jakarta_Sans({
   variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["500", "600"],
-  style: ["normal", "italic"],
+  weight: ["600", "700", "800"],
 });
 
 const inter = Inter({
@@ -26,7 +27,7 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "Haklı mıyım?",
-  description: "Haklı mıyım? - Anonim oylama ve yorum platformu",
+  description: "Olayını anlat, karar halkın olsun.",
 };
 
 export default function RootLayout({
@@ -37,16 +38,19 @@ export default function RootLayout({
   return (
     <html
       lang="tr"
-      className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${displayFont.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body
         className="min-h-full flex flex-col"
-        style={{ background: "#EFE9DA", color: "#22211A", fontFamily: "var(--font-inter), sans-serif" }}
+        style={{ background: "var(--bg)", color: "var(--text-primary)", fontFamily: "var(--font-inter), sans-serif" }}
       >
         <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
         <AuthProvider>
-          <Navbar />
-          {children}
+          <SidebarProvider>
+            <Sidebar />
+            <Navbar />
+            {children}
+          </SidebarProvider>
         </AuthProvider>
       </body>
     </html>

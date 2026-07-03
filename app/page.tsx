@@ -1,18 +1,9 @@
 import { supabase } from '@/lib/supabase'
 import PostCard from '@/components/PostCard'
 import Link from 'next/link'
+import { CATEGORIES } from '@/lib/categories'
 
 const PAGE_SIZE = 9
-
-const CATEGORIES = [
-  { key: 'tumu', label: 'Tümü' },
-  { key: 'aile', label: 'Aile' },
-  { key: 'is', label: 'İş' },
-  { key: 'arkadaslik', label: 'Arkadaşlık' },
-  { key: 'iliski', label: 'İlişki' },
-  { key: 'para', label: 'Para' },
-  { key: 'diger', label: 'Diğer' },
-]
 
 export default async function Home({
   searchParams,
@@ -66,7 +57,7 @@ export default async function Home({
   const tabs = [
     { key: 'yeni', label: 'Yeni' },
     { key: 'tartisilan', label: 'En çok tartışılan' },
-    { key: 'belirsiz', label: 'Kazananı belirsiz' },
+    { key: 'belirsiz', label: 'Yakın oylar' },
   ]
 
   function buildUrl(overrides: Record<string, string>) {
@@ -81,24 +72,24 @@ export default async function Home({
 
   return (
     <div>
-      <div style={{ padding: '40px 28px 32px', borderBottom: '1px solid #DDD4BC', maxWidth: '640px', margin: '0 auto' }}>
-        <p style={{ fontFamily: 'var(--font-plex-mono), monospace', fontSize: '11px', letterSpacing: '0.06em', color: '#8A7F5C', margin: '0 0 10px' }}>
-          Halk mahkemesi · herkes oy verir
+      <div style={{ padding: '44px 28px 32px', maxWidth: '720px', margin: '0 auto' }}>
+        <p style={{ fontFamily: 'var(--font-plex-mono), monospace', fontSize: '11px', letterSpacing: '0.06em', color: 'var(--brand)', fontWeight: 600, margin: '0 0 10px' }}>
+          Gerçek olaylar · gerçek oylar
         </p>
-        <h1 style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 600, fontSize: '34px', lineHeight: 1.15, color: '#22211A', margin: '0 0 12px', maxWidth: '420px' }}>
+        <h1 style={{ fontFamily: 'var(--font-fraunces), sans-serif', fontWeight: 800, fontSize: '36px', lineHeight: 1.15, color: 'var(--text-primary)', margin: '0 0 12px', maxWidth: '440px' }}>
           Olayını anlat,<br />karar halkın olsun.
         </h1>
-        <p style={{ fontSize: '14px', color: '#5C594A', margin: '0 0 20px', maxWidth: '380px', lineHeight: 1.6 }}>
-          Başına geleni yaz, herkes "haklısın" ya da "haksızsın" mührünü bassın.
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: '0 0 22px', maxWidth: '380px', lineHeight: 1.6 }}>
+          Başına geleni yaz, herkes "haklısın" ya da "haksızsın" desin.
         </p>
         <Link href="/yeni-gonderi">
-          <button style={{ fontFamily: 'var(--font-plex-mono), monospace', fontSize: '12px', letterSpacing: '0.04em', background: '#22211A', color: '#F1EEE4', border: 'none', borderRadius: '4px', padding: '11px 20px', cursor: 'pointer' }}>
-            + Dava aç
+          <button style={{ fontSize: '13px', fontWeight: 600, background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 'var(--radius-full)', padding: '12px 22px', cursor: 'pointer' }}>
+            + Paylaşım yap
           </button>
         </Link>
       </div>
 
-      <div style={{ maxWidth: '640px', margin: '0 auto', padding: '20px 28px 0' }}>
+      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 28px' }}>
         <form action="/" method="GET" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
           <input type="hidden" name="filter" value={activeFilter} />
           <input type="hidden" name="category" value={activeCategory} />
@@ -109,23 +100,23 @@ export default async function Home({
             placeholder="Anahtar kelime ile ara..."
             style={{
               flex: 1,
-              padding: '9px 12px',
+              padding: '10px 14px',
               fontSize: '13px',
-              border: '1px solid #DDD4BC',
-              borderRadius: '4px',
-              background: '#FBF9F1',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--surface)',
             }}
           />
           <button
             type="submit"
             style={{
-              fontFamily: 'var(--font-plex-mono), monospace',
               fontSize: '12px',
-              padding: '9px 16px',
-              background: '#22211A',
-              color: '#F1EEE4',
+              fontWeight: 600,
+              padding: '10px 18px',
+              background: 'var(--text-primary)',
+              color: '#fff',
               border: 'none',
-              borderRadius: '4px',
+              borderRadius: 'var(--radius-md)',
               cursor: 'pointer',
             }}
           >
@@ -133,21 +124,21 @@ export default async function Home({
           </button>
         </form>
 
-        <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap' }}>
           {tabs.map((tab) => {
             const active = activeFilter === tab.key
             return (
-              <Link key={tab.key} href={buildUrl({ filter: tab.key, page: '1' })} style={{ textDecoration: 'none' }}>
+              <Link key={tab.key} href={buildUrl({ filter: tab.key, page: '1' })}>
                 <span
                   style={{
                     display: 'inline-block',
-                    fontFamily: 'var(--font-plex-mono), monospace',
                     fontSize: '12px',
-                    padding: '7px 14px',
-                    borderRadius: '4px',
-                    background: active ? '#22211A' : 'transparent',
-                    color: active ? '#F1EEE4' : '#8A7F5C',
-                    border: active ? 'none' : '1px solid #DDD4BC',
+                    fontWeight: 600,
+                    padding: '8px 15px',
+                    borderRadius: 'var(--radius-full)',
+                    background: active ? 'var(--brand)' : 'var(--surface)',
+                    color: active ? '#fff' : 'var(--text-secondary)',
+                    border: active ? 'none' : '1px solid var(--border)',
                   }}
                 >
                   {tab.label}
@@ -161,17 +152,16 @@ export default async function Home({
           {CATEGORIES.map((c) => {
             const active = activeCategory === c.key
             return (
-              <Link key={c.key} href={buildUrl({ category: c.key, page: '1' })} style={{ textDecoration: 'none' }}>
+              <Link key={c.key} href={buildUrl({ category: c.key, page: '1' })}>
                 <span
                   style={{
                     display: 'inline-block',
-                    fontFamily: 'var(--font-plex-mono), monospace',
                     fontSize: '11px',
-                    padding: '5px 11px',
-                    borderRadius: '3px',
-                    background: active ? '#5C594A' : 'transparent',
-                    color: active ? '#F1EEE4' : '#8A7F5C',
-                    border: active ? 'none' : '1px solid #DDD4BC',
+                    fontWeight: 500,
+                    padding: '6px 12px',
+                    borderRadius: 'var(--radius-full)',
+                    background: active ? c.color : c.bg,
+                    color: active ? '#fff' : c.color,
                   }}
                 >
                   {c.label}
@@ -182,10 +172,10 @@ export default async function Home({
         </div>
       </div>
 
-      <div style={{ padding: '24px 28px 24px', maxWidth: '640px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ padding: '24px 28px 24px', maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {displayPosts.length === 0 && (
-          <p style={{ color: '#5C594A', fontSize: '14px' }}>
-            {searchQuery ? 'Bu aramayla eşleşen dava yok.' : activeFilter === 'belirsiz' ? 'Henüz yeterince oy almış dava yok.' : 'Henüz dava yok, ilkini sen aç.'}
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+            {searchQuery ? 'Bu aramayla eşleşen paylaşım yok.' : activeFilter === 'belirsiz' ? 'Henüz yeterince oy almış paylaşım yok.' : 'Henüz paylaşım yok, ilkini sen yap.'}
           </p>
         )}
 
@@ -195,20 +185,20 @@ export default async function Home({
       </div>
 
       {totalPages > 1 && (
-        <div style={{ maxWidth: '640px', margin: '0 auto', padding: '0 28px 48px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 28px 48px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
           {currentPage > 1 && (
-            <Link href={buildUrl({ page: String(currentPage - 1) })} style={{ textDecoration: 'none' }}>
-              <span style={{ fontFamily: 'var(--font-plex-mono), monospace', fontSize: '12px', padding: '8px 14px', border: '1px solid #DDD4BC', borderRadius: '4px', color: '#22211A' }}>
+            <Link href={buildUrl({ page: String(currentPage - 1) })}>
+              <span style={{ fontSize: '12px', fontWeight: 500, padding: '8px 14px', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)' }}>
                 ← Önceki
               </span>
             </Link>
           )}
-          <span style={{ fontFamily: 'var(--font-plex-mono), monospace', fontSize: '12px', padding: '8px 14px', color: '#8A7F5C' }}>
+          <span style={{ fontSize: '12px', padding: '8px 14px', color: 'var(--text-muted)' }}>
             {currentPage} / {totalPages}
           </span>
           {currentPage < totalPages && (
-            <Link href={buildUrl({ page: String(currentPage + 1) })} style={{ textDecoration: 'none' }}>
-              <span style={{ fontFamily: 'var(--font-plex-mono), monospace', fontSize: '12px', padding: '8px 14px', border: '1px solid #DDD4BC', borderRadius: '4px', color: '#22211A' }}>
+            <Link href={buildUrl({ page: String(currentPage + 1) })}>
+              <span style={{ fontSize: '12px', fontWeight: 500, padding: '8px 14px', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)' }}>
                 Sonraki →
               </span>
             </Link>
