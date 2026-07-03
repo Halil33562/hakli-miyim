@@ -12,6 +12,7 @@ type Post = {
   content: string
   upvotes: number
   downvotes: number
+  category?: string
 }
 
 function getAnonId() {
@@ -122,6 +123,11 @@ export default function PostCard({ post }: { post: Post }) {
       <p style={{ fontFamily: 'var(--font-plex-mono), monospace', fontSize: '10px', letterSpacing: '0.06em', color: '#A79B72', margin: '0 0 8px' }}>
         DOSYA NO {caseNumber}
       </p>
+      {post.category && (
+  <span style={{ display: 'inline-block', fontFamily: 'var(--font-plex-mono), monospace', fontSize: '10px', padding: '3px 9px', borderRadius: '3px', background: '#EFE9DA', color: '#5C594A', marginBottom: '10px' }}>
+    {post.category}
+  </span>
+)}  
 
       <Link href={`/post/${post.id}`} style={{ textDecoration: 'none' }}>
         <h2 style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 600, fontSize: '19px', color: '#22211A', margin: '0 0 8px', lineHeight: 1.3, cursor: 'pointer' }}>
